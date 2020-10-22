@@ -107,6 +107,7 @@ export default class VideoPlayer extends Component {
       togglePlayPause: this._togglePlayPause.bind(this),
       toggleControls: this._toggleControls.bind(this),
       toggleTimer: this._toggleTimer.bind(this),
+      toggleMute: this._toggleMute.bind(this),
     };
 
     /**
@@ -501,6 +502,15 @@ export default class VideoPlayer extends Component {
       typeof this.events.onPlay === 'function' && this.events.onPlay();
     }
 
+    this.setState(state);
+  }
+
+  /**
+   * Toggle sound on or off
+   */
+  _toggleMute() {
+    let state = this.state;
+    state.muted = !state.muted;
     this.setState(state);
   }
 
@@ -1026,6 +1036,9 @@ export default class VideoPlayer extends Component {
     const playPauseControl = this.props.disablePlayPause
       ? this.renderNullControl()
       : this.renderPlayPause();
+    const muteControl = this.props.disableMute
+      ? this.renderNullControl()
+      : this.renderMute();
 
     return (
       <Animated.View
@@ -1044,7 +1057,9 @@ export default class VideoPlayer extends Component {
           <SafeAreaView
             style={[styles.controls.row, styles.controls.bottomControlGroup]}>
             {playPauseControl}
+            {muteControl}
             {this.renderTitle()}
+            <View style={{flex: 1}} />
             {timerControl}
           </SafeAreaView>
         </ImageBackground>
@@ -1105,6 +1120,21 @@ export default class VideoPlayer extends Component {
       <Image source={source} />,
       this.methods.togglePlayPause,
       styles.controls.playPause,
+    );
+  }
+
+  /**
+   * Render the mute button and show the respective icon
+   */
+  renderMute() {
+    let source =
+      this.state.muted === true
+        ? require('./assets/img/volume-mute.png')
+        : require('./assets/img/volume-high.png');
+    return this.renderControl(
+      <Image source={source} style={{ width: 18, height: 18}} />,
+      this.methods.toggleMute,
+      styles.controls.mute,
     );
   }
 
@@ -1325,7 +1355,6 @@ const styles = {
     bottomControlGroup: {
       alignSelf: 'stretch',
       alignItems: 'center',
-      justifyContent: 'space-between',
       marginLeft: 12,
       marginRight: 12,
       marginBottom: 0,
@@ -1338,8 +1367,11 @@ const styles = {
     },
     playPause: {
       position: 'relative',
-      width: 80,
+      width: 40,
       zIndex: 0,
+    },
+    mute: {
+      padding: 12,
     },
     title: {
       alignItems: 'center',
